@@ -65,22 +65,22 @@
       <div class="ds-table-wrap">
         <div class="ds-table">
           <div class="ds-tr ds-tr--head">
-            <div class="ds-th">名字</div>
             <div class="ds-th">Token</div>
+            <div class="ds-th">Value</div>
             <div class="ds-th">示例</div>
           </div>
-          <div v-for="row in brandColorRows" :key="row.name" class="ds-tr">
-            <div class="ds-td ds-td--name">{{ row.name }}</div>
-            <div class="ds-td ds-td--token ds-td-token-cell">
-              <span class="ds-td-token-text">{{ row.token }}</span>
+          <div v-for="row in brandColorRows" :key="row.tokenKey" class="ds-tr">
+            <div class="ds-td ds-td--token">{{ row.tokenLabel }}</div>
+            <div class="ds-td ds-td--value ds-td-token-cell">
+              <span class="ds-td-token-text">{{ row.value }}</span>
               <button
                 type="button"
                 class="ds-token-copy"
-                :aria-label="`复制色值 ${row.token}`"
-                @click.stop="copyToken(row.token)"
+                :aria-label="`复制色值 ${row.value}`"
+                @click.stop="copyToken(row.value)"
               >
                 <svg
-                  v-if="lastCopiedToken !== row.token"
+                  v-if="lastCopiedToken !== row.value"
                   class="ds-token-copy__icon"
                   width="16"
                   height="16"
@@ -117,7 +117,7 @@
               </button>
             </div>
             <div class="ds-td ds-td--sample">
-              <span class="ds-swatch" :style="{ background: row.hex }" />
+              <span class="ds-swatch" :style="{ background: row.value }" />
             </div>
           </div>
         </div>
@@ -128,6 +128,7 @@
 
 <script lang="ts" setup>
 import { reactive, ref } from 'vue';
+import { getBrandPurpleValue, type BrandPurpleToken } from './tokens/brandPurple';
 
 const lastCopiedToken = ref<string | null>(null);
 let copyFeedbackTimer: ReturnType<typeof setTimeout> | null = null;
@@ -215,18 +216,25 @@ const colorTabs = [
 
 const activeColorTab = ref<(typeof colorTabs)[number]>('品牌色');
 
-const brandColorRows = [
-  { name: 'Purple-1', token: '#F3F4FF', hex: '#F3F4FF' },
-  { name: 'Purple-2', token: '#E9ECFF', hex: '#E9ECFF' },
-  { name: 'Purple-3', token: '#DDDCFF', hex: '#DDDCFF' },
-  { name: 'Purple-4', token: '#CDCBFF', hex: '#CDCBFF' },
-  { name: 'Purple-5', token: '#8580FF', hex: '#8580FF' },
-  { name: 'Purple-6*', token: '#6962FF', hex: '#6962FF' },
-  { name: 'Purple-7', token: '#5650DC', hex: '#5650DC' },
-  { name: 'Purple-8', token: '#453CB8', hex: '#453CB8' },
-  { name: 'Purple-9', token: '#352C94', hex: '#352C94' },
-  { name: 'Purple-10', token: '#271E70', hex: '#271E70' },
+/** 表格行：规范 tokenKey 用于代码取值；tokenLabel 可与设计稿展示一致（如 purple-6*） */
+const brandPurpleTableOrder: { tokenKey: BrandPurpleToken; tokenLabel?: string }[] = [
+  { tokenKey: 'purple-1' },
+  { tokenKey: 'purple-2' },
+  { tokenKey: 'purple-3' },
+  { tokenKey: 'purple-4' },
+  { tokenKey: 'purple-5' },
+  { tokenKey: 'purple-6', tokenLabel: 'purple-6*' },
+  { tokenKey: 'purple-7' },
+  { tokenKey: 'purple-8' },
+  { tokenKey: 'purple-9' },
+  { tokenKey: 'purple-10' },
 ];
+
+const brandColorRows = brandPurpleTableOrder.map(({ tokenKey, tokenLabel }) => ({
+  tokenKey,
+  tokenLabel: tokenLabel ?? tokenKey,
+  value: getBrandPurpleValue(tokenKey),
+}));
 </script>
 
 <style lang="scss">
@@ -558,10 +566,13 @@ $main-pad: clamp(16px, 4vw, 120px);
   color: $text-1;
 }
 
-.ds-td--name {
+.ds-td--token,
+.ds-td--value {
   font-size: 14px;
   font-weight: 400;
   color: $text-5;
+  min-width: 0;
+  word-break: break-all;
 }
 
 .ds-td-token-cell {
@@ -570,11 +581,7 @@ $main-pad: clamp(16px, 4vw, 120px);
 }
 
 .ds-td-token-text {
-  font-size: 14px;
-  font-weight: 400;
-  color: $text-5;
   min-width: 0;
-  word-break: break-all;
 }
 
 .ds-token-copy {
