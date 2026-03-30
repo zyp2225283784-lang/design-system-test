@@ -71,50 +71,53 @@
           </div>
           <div v-for="row in brandColorRows" :key="row.tokenKey" class="ds-tr">
             <div class="ds-td ds-td--token">{{ row.tokenLabel }}</div>
-            <div class="ds-td ds-td--value ds-td-token-cell">
-              <span class="ds-td-token-text">{{ row.value }}</span>
-              <button
-                type="button"
-                class="ds-token-copy"
-                :aria-label="`复制色值 ${row.value}`"
-                @click.stop="copyToken(row.value)"
-              >
-                <svg
-                  v-if="lastCopiedToken !== row.value"
-                  class="ds-token-copy__icon"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  aria-hidden="true"
+            <div class="ds-td ds-td--value">
+              <div class="ds-td-value-copy-wrap">
+                <span class="ds-td-token-text">{{ row.value }}</span>
+                <button
+                  type="button"
+                  class="ds-token-copy"
+                  :class="{ 'ds-token-copy--copied': lastCopiedToken === row.value }"
+                  :aria-label="`复制色值 ${row.value}`"
+                  @click.stop="copyToken(row.value)"
                 >
-                  <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2" />
-                  <path
-                    d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  />
-                </svg>
-                <svg
-                  v-else
-                  class="ds-token-copy__icon ds-token-copy__icon--ok"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M20 6L9 17l-5-5"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-              </button>
+                  <svg
+                    v-if="lastCopiedToken !== row.value"
+                    class="ds-token-copy__icon"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                  >
+                    <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2" />
+                    <path
+                      d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    />
+                  </svg>
+                  <svg
+                    v-else
+                    class="ds-token-copy__icon ds-token-copy__icon--ok"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M20 6L9 17l-5-5"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </button>
+              </div>
             </div>
             <div class="ds-td ds-td--sample">
               <span class="ds-swatch" :style="{ background: row.value }" />
@@ -572,16 +575,26 @@ $main-pad: clamp(16px, 4vw, 120px);
   font-weight: 400;
   color: $text-5;
   min-width: 0;
+}
+
+.ds-td--token {
   word-break: break-all;
 }
 
-.ds-td-token-cell {
-  gap: 8px;
+/* Value 列：色值靠左，hover 时复制图标出现在列右侧 */
+.ds-td-value-copy-wrap {
+  display: flex;
+  width: 100%;
+  align-items: center;
   justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
 }
 
 .ds-td-token-text {
+  flex: 1;
   min-width: 0;
+  word-break: break-all;
 }
 
 .ds-token-copy {
@@ -620,8 +633,8 @@ $main-pad: clamp(16px, 4vw, 120px);
   }
 }
 
-.ds-td-token-cell:hover .ds-token-copy,
-.ds-td-token-cell:focus-within .ds-token-copy {
+/* 仅 hover 色值栏时显示复制/对勾；复制成功若鼠标已离开，按钮与对勾一并隐藏 */
+.ds-td-value-copy-wrap:hover .ds-token-copy {
   opacity: 1;
 }
 
@@ -629,6 +642,10 @@ $main-pad: clamp(16px, 4vw, 120px);
 @media (hover: none) and (pointer: coarse) {
   .ds-token-copy {
     opacity: 0.85;
+  }
+
+  .ds-token-copy.ds-token-copy--copied {
+    opacity: 1;
   }
 }
 
