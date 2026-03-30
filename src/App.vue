@@ -71,7 +71,51 @@
           </div>
           <div v-for="row in brandColorRows" :key="row.name" class="ds-tr">
             <div class="ds-td ds-td--name">{{ row.name }}</div>
-            <div class="ds-td ds-td--token">{{ row.token }}</div>
+            <div class="ds-td ds-td--token ds-td-token-cell">
+              <span class="ds-td-token-text">{{ row.token }}</span>
+              <button
+                type="button"
+                class="ds-token-copy"
+                :aria-label="`复制色值 ${row.token}`"
+                @click.stop="copyToken(row.token)"
+              >
+                <svg
+                  v-if="lastCopiedToken !== row.token"
+                  class="ds-token-copy__icon"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2" />
+                  <path
+                    d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  />
+                </svg>
+                <svg
+                  v-else
+                  class="ds-token-copy__icon ds-token-copy__icon--ok"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M20 6L9 17l-5-5"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+            </div>
             <div class="ds-td ds-td--sample">
               <span class="ds-swatch" :style="{ background: row.hex }" />
             </div>
@@ -84,6 +128,23 @@
 
 <script lang="ts" setup>
 import { reactive, ref } from 'vue';
+
+const lastCopiedToken = ref<string | null>(null);
+let copyFeedbackTimer: ReturnType<typeof setTimeout> | null = null;
+
+async function copyToken(token: string): Promise<void> {
+  try {
+    await navigator.clipboard.writeText(token);
+    lastCopiedToken.value = token;
+    if (copyFeedbackTimer) clearTimeout(copyFeedbackTimer);
+    copyFeedbackTimer = setTimeout(() => {
+      lastCopiedToken.value = null;
+      copyFeedbackTimer = null;
+    }, 1500);
+  } catch {
+    /* 非 HTTPS 或权限被拒时静默失败 */
+  }
+}
 
 type NavGroupKey = 'foundation' | 'prompt' | 'components';
 
@@ -497,11 +558,79 @@ $main-pad: clamp(16px, 4vw, 120px);
   color: $text-1;
 }
 
-.ds-td--name,
-.ds-td--token {
+.ds-td--name {
   font-size: 14px;
   font-weight: 400;
   color: $text-5;
+}
+
+.ds-td-token-cell {
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.ds-td-token-text {
+  font-size: 14px;
+  font-weight: 400;
+  color: $text-5;
+  min-width: 0;
+  word-break: break-all;
+}
+
+.ds-token-copy {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: $text-5;
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity 0.15s ease,
+    color 0.15s ease,
+    background 0.15s ease;
+
+  &:hover {
+    color: $text-1;
+    background: rgba(232, 234, 238, 0.6);
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    opacity: 1;
+    outline: 2px solid rgba(18, 25, 38, 0.35);
+    outline-offset: 1px;
+  }
+}
+
+.ds-td-token-cell:hover .ds-token-copy,
+.ds-td-token-cell:focus-within .ds-token-copy {
+  opacity: 1;
+}
+
+/* 触控设备无 hover：始终显示复制入口 */
+@media (hover: none) and (pointer: coarse) {
+  .ds-token-copy {
+    opacity: 0.85;
+  }
+}
+
+.ds-token-copy__icon {
+  display: block;
+}
+
+.ds-token-copy__icon--ok {
+  color: #5650dc;
 }
 
 .ds-td--sample {
@@ -509,8 +638,8 @@ $main-pad: clamp(16px, 4vw, 120px);
 }
 
 .ds-swatch {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   flex-shrink: 0;
 }
