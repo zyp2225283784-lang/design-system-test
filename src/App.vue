@@ -15,12 +15,21 @@
           >
             <span class="ds-nav-l1-text">{{ group.title }}</span>
             <span class="ds-chevron-wrap" aria-hidden="true">
-              <img
-                class="ds-chevron"
-                :class="{ 'ds-chevron--collapsed': !isExpanded(group.key) }"
-                src="/assets/d1afe008175bfa88ec9784e2e461ae941eec3927.svg"
-                alt=""
-              />
+              <svg
+                class="ds-chevron-svg"
+                :class="{ 'ds-chevron-svg--collapsed': !isExpanded(group.key) }"
+                viewBox="0 0 11.04 6.04"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M0.52 5.52L5.52 0.52L10.52 5.52"
+                  stroke="currentColor"
+                  stroke-width="1.04"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
             </span>
           </button>
           <div v-show="isExpanded(group.key)" class="ds-nav-children">
@@ -39,88 +48,98 @@
     </aside>
 
     <main class="ds-main">
-      <header class="ds-main-header">
-        <h1 class="ds-page-title">颜色</h1>
-      </header>
-
-      <div class="ds-tabs" role="tablist" aria-label="颜色分类">
-        <button
-          v-for="tab in colorTabs"
-          :key="tab"
-          type="button"
-          role="tab"
-          class="ds-tab"
-          :class="{ 'ds-tab--active': tab === activeColorTab }"
-          :aria-selected="tab === activeColorTab"
-          @click="activeColorTab = tab"
-        >
-          <span class="ds-tab__label">{{ tab }}</span>
-        </button>
-      </div>
-
-      <p class="ds-desc">
-        有言的品牌主色，用于视觉重的强引导，根据具体场景抓请使用
-      </p>
-
-      <div class="ds-table-wrap">
-        <div class="ds-table">
-          <div class="ds-tr ds-tr--head">
-            <div class="ds-th">Token</div>
-            <div class="ds-th">Value</div>
-            <div class="ds-th">示例</div>
+      <div class="ds-main-content">
+        <header class="ds-main-header">
+          <div class="ds-content">
+            <h1 class="ds-page-title">颜色</h1>
           </div>
-          <div v-for="row in brandColorRows" :key="row.tokenKey" class="ds-tr">
-            <div class="ds-td ds-td--token">{{ row.tokenLabel }}</div>
-            <div class="ds-td ds-td--value">
-              <div class="ds-td-value-copy-wrap">
-                <span class="ds-td-token-text">{{ row.value }}</span>
-                <button
-                  type="button"
-                  class="ds-token-copy"
-                  :class="{ 'ds-token-copy--copied': lastCopiedToken === row.value }"
-                  :aria-label="`复制色值 ${row.value}`"
-                  @click.stop="copyToken(row.value)"
-                >
-                  <svg
-                    v-if="lastCopiedToken !== row.value"
-                    class="ds-token-copy__icon"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
-                  >
-                    <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2" />
-                    <path
-                      d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
-                      stroke="currentColor"
-                      stroke-width="2"
-                    />
-                  </svg>
-                  <svg
-                    v-else
-                    class="ds-token-copy__icon ds-token-copy__icon--ok"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M20 6L9 17l-5-5"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                </button>
-              </div>
+        </header>
+
+        <div class="ds-tabs-bar">
+          <div class="ds-content">
+            <div class="ds-tabs" role="tablist" aria-label="颜色分类">
+              <button
+                v-for="tab in colorTabs"
+                :key="tab"
+                type="button"
+                role="tab"
+                class="ds-tab"
+                :class="{ 'ds-tab--active': tab === activeColorTab }"
+                :aria-selected="tab === activeColorTab"
+                @click="activeColorTab = tab"
+              >
+                <span class="ds-tab__label">{{ tab }}</span>
+              </button>
             </div>
-            <div class="ds-td ds-td--sample">
-              <span class="ds-swatch" :style="{ background: row.value }" />
+          </div>
+        </div>
+
+        <div class="ds-content">
+          <p class="ds-desc">
+            {{ colorTabDesc }}
+          </p>
+
+          <div class="ds-table-wrap">
+            <div class="ds-table">
+              <div class="ds-tr ds-tr--head">
+                <div class="ds-th">Token</div>
+                <div class="ds-th">Value</div>
+                <div class="ds-th">示例</div>
+              </div>
+              <div v-for="row in colorTableRows" :key="`${activeColorTab}-${row.tokenKey}`" class="ds-tr">
+                <div class="ds-td ds-td--token">{{ row.tokenLabel }}</div>
+                <div class="ds-td ds-td--value">
+                  <div class="ds-td-value-copy-wrap">
+                    <span class="ds-td-token-text">{{ row.value }}</span>
+                    <button
+                      type="button"
+                      class="ds-token-copy"
+                      :class="{ 'ds-token-copy--copied': lastCopiedToken === row.value }"
+                      :aria-label="`复制色值 ${row.value}`"
+                      @click.stop="copyToken(row.value)"
+                    >
+                      <svg
+                        v-if="lastCopiedToken !== row.value"
+                        class="ds-token-copy__icon"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
+                      >
+                        <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2" />
+                        <path
+                          d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        />
+                      </svg>
+                      <svg
+                        v-else
+                        class="ds-token-copy__icon ds-token-copy__icon--ok"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M20 6L9 17l-5-5"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="ds-td ds-td--sample">
+                  <span class="ds-swatch" :style="{ background: row.value }" />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -130,8 +149,10 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { getBrandPurpleValue, type BrandPurpleToken } from './tokens/brandPurple';
+import { fontColorTableOrder, getFontColorValue } from './tokens/fontColor';
+import { getNeutralBackValue, neutralBackTableOrder } from './tokens/neutralBack';
 
 const lastCopiedToken = ref<string | null>(null);
 let copyFeedbackTimer: ReturnType<typeof setTimeout> | null = null;
@@ -221,23 +242,59 @@ const activeColorTab = ref<(typeof colorTabs)[number]>('品牌色');
 
 /** 表格行：规范 tokenKey 用于代码取值；tokenLabel 可与设计稿展示一致（如 purple-6*） */
 const brandPurpleTableOrder: { tokenKey: BrandPurpleToken; tokenLabel?: string }[] = [
-  { tokenKey: 'purple-1' },
-  { tokenKey: 'purple-2' },
-  { tokenKey: 'purple-3' },
-  { tokenKey: 'purple-4' },
-  { tokenKey: 'purple-5' },
-  { tokenKey: 'purple-6', tokenLabel: 'purple-6*' },
-  { tokenKey: 'purple-7' },
-  { tokenKey: 'purple-8' },
-  { tokenKey: 'purple-9' },
-  { tokenKey: 'purple-10' },
+  { tokenKey: 'purple-1', tokenLabel: 'Purple-1' },
+  { tokenKey: 'purple-2', tokenLabel: 'Purple-2' },
+  { tokenKey: 'purple-3', tokenLabel: 'Purple-3' },
+  { tokenKey: 'purple-4', tokenLabel: 'Purple-4' },
+  { tokenKey: 'purple-5', tokenLabel: 'Purple-5' },
+  { tokenKey: 'purple-6', tokenLabel: 'Purple-6*' },
+  { tokenKey: 'purple-7', tokenLabel: 'Purple-7' },
+  { tokenKey: 'purple-8', tokenLabel: 'Purple-8' },
+  { tokenKey: 'purple-9', tokenLabel: 'Purple-9' },
+  { tokenKey: 'purple-10', tokenLabel: 'Purple-10' },
 ];
 
-const brandColorRows = brandPurpleTableOrder.map(({ tokenKey, tokenLabel }) => ({
+type ColorTableRow = {
+  tokenKey: string;
+  tokenLabel: string;
+  value: string;
+};
+
+const brandColorRows: ColorTableRow[] = brandPurpleTableOrder.map(({ tokenKey, tokenLabel }) => ({
   tokenKey,
   tokenLabel: tokenLabel ?? tokenKey,
   value: getBrandPurpleValue(tokenKey),
 }));
+
+const fontColorRows: ColorTableRow[] = fontColorTableOrder.map(({ tokenKey, tokenLabel }) => ({
+  tokenKey,
+  tokenLabel: tokenLabel ?? tokenKey,
+  value: getFontColorValue(tokenKey),
+}));
+
+const neutralBackRows: ColorTableRow[] = neutralBackTableOrder.map(({ tokenKey, tokenLabel }) => ({
+  tokenKey,
+  tokenLabel: tokenLabel ?? tokenKey,
+  value: getNeutralBackValue(tokenKey),
+}));
+
+const colorTableRows = computed<ColorTableRow[]>(() => {
+  const tab = activeColorTab.value;
+  if (tab === '字体色') return fontColorRows;
+  if (tab === '中性色') return neutralBackRows;
+  return brandColorRows;
+});
+
+const colorTabDesc = computed(() => {
+  const tab = activeColorTab.value;
+  if (tab === '字体色') {
+    return '字体色阶对应正文、辅助与弱化文案层级，请按场景选用 Text token，避免硬编码色值。';
+  }
+  if (tab === '中性色') {
+    return '中性背景色阶（Back-1～Back-10）用于页面底色、分区与描边，请按场景选用 Back token，避免硬编码色值。';
+  }
+  return '有言的品牌主色，用于视觉重的强引导，根据具体场景抓请使用';
+});
 </script>
 
 <style lang="scss">
@@ -293,8 +350,8 @@ $back-4: #e8eaee;
 }
 
 .ds-logo {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   flex-shrink: 0;
 }
 
@@ -318,13 +375,13 @@ $back-4: #e8eaee;
   width: 100%;
 }
 
+/* 一级导航：Figma Design-system-test 组件 node 39:91（正常 / hover） */
 .ds-nav-l1 {
-  position: relative;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
-  height: 56px;
-  padding: 0 24px;
+  padding: 20px 24px 12px;
   border: none;
   margin: 0;
   box-sizing: border-box;
@@ -332,10 +389,16 @@ $back-4: #e8eaee;
   font: inherit;
   text-align: left;
   cursor: pointer;
-  color: inherit;
+  overflow: hidden;
+  transition: color 0.12s ease;
 
-  &:hover {
-    background: rgba(232, 234, 238, 0.35);
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(18, 25, 38, 0.35);
+    outline-offset: -2px;
   }
 }
 
@@ -344,60 +407,107 @@ $back-4: #e8eaee;
 }
 
 .ds-nav-l1-text {
+  position: relative;
+  flex-shrink: 0;
   font-size: 14px;
   font-weight: 500;
+  line-height: normal;
   color: $text-1;
+  white-space: nowrap;
+  transition: color 0.12s ease;
+}
+
+.ds-nav-l1:hover .ds-nav-l1-text {
+  color: $text-3;
 }
 
 .ds-chevron-wrap {
-  position: absolute;
-  right: 24px;
-  top: 50%;
-  transform: translateY(-50%);
+  position: relative;
+  flex-shrink: 0;
   width: 16px;
   height: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: $text-1;
+  overflow: hidden;
+  transition: color 0.12s ease;
 }
 
-.ds-chevron {
+.ds-nav-l1:hover .ds-chevron-wrap {
+  color: $text-3;
+}
+
+.ds-chevron-svg {
   width: 11px;
   height: 6px;
   display: block;
   transition: transform 0.2s ease;
 }
 
-/* 展开：箭头朝上（与设计稿一致）；收起：朝下 */
-.ds-chevron--collapsed {
+/* 展开：箭头朝上；收起：朝下 */
+.ds-chevron-svg--collapsed {
   transform: rotate(180deg);
 }
 
+/* 二级导航：Figma Design-system-test 组件 node 39:86（未选中 / hover / 选中） */
 .ds-nav-l2 {
-  display: block;
+  display: flex;
+  align-items: center;
   width: 100%;
-  height: 44px;
-  padding: 0;
-  padding-left: 40px;
+  min-height: 44px;
+  padding: 10px 32px;
+  box-sizing: border-box;
   border: none;
+  border-left: 3px solid transparent;
   background: transparent;
   text-align: left;
   font-size: 14px;
   font-weight: 400;
-  color: $text-3;
+  line-height: normal;
+  color: $text-5;
   font-family: inherit;
   cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  transition:
+    color 0.12s ease,
+    background 0.12s ease,
+    border-color 0.12s ease;
 
-  &:hover {
-    background: rgba(232, 234, 238, 0.5);
+  /* hover：Back-4 底 + Text-1 字色，无左边线 */
+  &:hover:not(.ds-nav-l2--active) {
+    background: $back-4;
+    color: $text-1;
   }
 }
 
 .ds-nav-l2--active {
   background: $back-4;
-  color: $text-3;
-  font-weight: 500;
+  color: $text-1;
+  font-weight: 400;
+  border-left-color: $text-1;
 }
+
+.ds-nav-l2--active:hover {
+  background: $back-4;
+  color: $text-1;
+  border-left-color: $text-1;
+}
+
+/* main-content 横向滚动；<1440 固定 1000+120 边距；≥1440 内容宽 1000→1200 线性（至 1920 封顶） */
+$layout-breakpoint: 1440px;
+$content-narrow: 1000px;
+$content-wide-cap: 1200px;
+$vp-fluid-start: 1440px;
+$edge-margin: 120px;
+$main-scroll-min: $edge-margin + $content-narrow + $edge-margin;
+/* 1440~1920：1000 + (vw-1440)*200/480；clamp 上下限对应 <1920 段与 ≥1920 固定 1200 */
+$content-width-fluid: clamp(
+  #{$content-narrow},
+  calc(#{$content-narrow} + (100vw - #{$vp-fluid-start}) * 200 / 480),
+  #{$content-wide-cap}
+);
 
 .ds-main {
   flex: 1;
@@ -405,16 +515,50 @@ $back-4: #e8eaee;
   min-height: 0;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+}
+
+.ds-main-content {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+
+  @media (max-width: ($layout-breakpoint - 1px)) {
+    overflow-x: auto;
+  }
 }
 
-/* 响应式水平内边距：窄屏贴边、宽屏接近设计稿 120px */
-$main-pad: clamp(16px, 4vw, 120px);
+.ds-content {
+  box-sizing: border-box;
+
+  @media (max-width: ($layout-breakpoint - 1px)) {
+    width: $content-narrow;
+    min-width: $content-narrow;
+    margin-left: $edge-margin;
+    margin-right: $edge-margin;
+  }
+
+  @media (min-width: $layout-breakpoint) {
+    width: $content-width-fluid;
+    min-width: $content-width-fluid;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (max-width: ($layout-breakpoint - 1px)) {
+  .ds-main-header,
+  .ds-tabs-bar {
+    min-width: $main-scroll-min;
+    box-sizing: border-box;
+  }
+}
 
 .ds-main-header {
-  padding: clamp(48px, 10vh, 80px) $main-pad 24px;
+  padding: 48px 0 24px;
   border-bottom: 1px solid $back-4;
   box-sizing: border-box;
 }
@@ -427,14 +571,19 @@ $main-pad: clamp(16px, 4vw, 120px);
   color: $text-1;
 }
 
+/* Tab 外栏：底边线与标题栏一致，横向铺满 main-content 可视区域 */
+.ds-tabs-bar {
+  border-bottom: 1px solid $back-4;
+  box-sizing: border-box;
+}
+
 /* Tab 条：Figma Design-system-test node 20:490（Tabs：未选中 / 选中 / hover） */
 .ds-tabs {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   gap: 12px 28px;
-  padding: 0 $main-pad;
-  border-bottom: 1px solid $back-4;
+  padding: 0;
   box-sizing: border-box;
 }
 
@@ -512,7 +661,7 @@ $main-pad: clamp(16px, 4vw, 120px);
 
 .ds-desc {
   margin: 0;
-  padding: 24px $main-pad;
+  padding: 24px 0;
   font-size: 12px;
   font-weight: 400;
   color: $text-7;
@@ -521,11 +670,9 @@ $main-pad: clamp(16px, 4vw, 120px);
 }
 
 .ds-table-wrap {
-  padding: 0 $main-pad clamp(40px, 8vh, 80px);
+  padding: 0 0 80px;
   box-sizing: border-box;
   width: 100%;
-  max-width: 100%;
-  overflow-x: auto;
 }
 
 .ds-table {
@@ -666,5 +813,7 @@ $main-pad: clamp(16px, 4vw, 120px);
   height: 40px;
   border-radius: 50%;
   flex-shrink: 0;
+  /* 内描边：Back-4，各 Tab 示例列统一 */
+  box-shadow: inset 0 0 0 1px $back-4;
 }
 </style>
