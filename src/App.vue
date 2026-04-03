@@ -2,7 +2,7 @@
   <div class="design-system-page">
     <aside class="ds-sidebar" aria-label="设计系统导航">
       <div class="ds-sidebar-header">
-        <img class="ds-logo" src="/assets/a30a4efc4bf8ca5a2e3f13072b9e5e86d7f24a96.svg" alt="" />
+        <img class="ds-logo" :src="logoUrl" alt="" />
         <span class="ds-brand-title">Desgn system</span>
       </div>
       <nav class="ds-sidebar-nav">
@@ -33,15 +33,9 @@
             </span>
           </button>
           <div v-show="isExpanded(group.key)" class="ds-nav-children">
-            <button
-              v-for="item in group.items"
-              :key="item.label"
-              type="button"
-              class="ds-nav-l2"
-              :class="{ 'ds-nav-l2--active': item.active }"
-            >
+            <DsNavL2 v-for="item in group.items" :key="item.label" :active="item.active">
               {{ item.label }}
-            </button>
+            </DsNavL2>
           </div>
         </div>
       </nav>
@@ -150,9 +144,15 @@
 
 <script lang="ts" setup>
 import { computed, reactive, ref } from 'vue';
+import DsNavL2 from './components/DsNavL2.vue';
 import { getBrandPurpleValue, type BrandPurpleToken } from './tokens/brandPurple';
 import { fontColorTableOrder, getFontColorValue } from './tokens/fontColor';
 import { getNeutralBackValue, neutralBackTableOrder } from './tokens/neutralBack';
+import { dangerErrorTableOrder, getDangerErrorValue } from './tokens/dangerError';
+import { getSuccessColorValue, successColorTableOrder } from './tokens/successColor';
+import { getWarningColorValue, warningColorTableOrder } from './tokens/warningColor';
+
+const logoUrl = `${import.meta.env.BASE_URL}assets/a30a4efc4bf8ca5a2e3f13072b9e5e86d7f24a96.svg`;
 
 const lastCopiedToken = ref<string | null>(null);
 let copyFeedbackTimer: ReturnType<typeof setTimeout> | null = null;
@@ -278,10 +278,31 @@ const neutralBackRows: ColorTableRow[] = neutralBackTableOrder.map(({ tokenKey, 
   value: getNeutralBackValue(tokenKey),
 }));
 
+const dangerErrorRows: ColorTableRow[] = dangerErrorTableOrder.map(({ tokenKey, tokenLabel }) => ({
+  tokenKey,
+  tokenLabel: tokenLabel ?? tokenKey,
+  value: getDangerErrorValue(tokenKey),
+}));
+
+const successColorRows: ColorTableRow[] = successColorTableOrder.map(({ tokenKey, tokenLabel }) => ({
+  tokenKey,
+  tokenLabel: tokenLabel ?? tokenKey,
+  value: getSuccessColorValue(tokenKey),
+}));
+
+const warningColorRows: ColorTableRow[] = warningColorTableOrder.map(({ tokenKey, tokenLabel }) => ({
+  tokenKey,
+  tokenLabel: tokenLabel ?? tokenKey,
+  value: getWarningColorValue(tokenKey),
+}));
+
 const colorTableRows = computed<ColorTableRow[]>(() => {
   const tab = activeColorTab.value;
   if (tab === '字体色') return fontColorRows;
   if (tab === '中性色') return neutralBackRows;
+  if (tab === '危险色') return dangerErrorRows;
+  if (tab === '成功色') return successColorRows;
+  if (tab === '警示色') return warningColorRows;
   return brandColorRows;
 });
 
@@ -292,6 +313,15 @@ const colorTabDesc = computed(() => {
   }
   if (tab === '中性色') {
     return '中性背景色阶（Back-1～Back-10）用于页面底色、分区与描边，请按场景选用 Back token，避免硬编码色值。';
+  }
+  if (tab === '危险色') {
+    return '危险色阶（Error-1～Error-10）用于错误、删除与强警示场景，请按场景选用 Error token，避免硬编码色值。';
+  }
+  if (tab === '成功色') {
+    return '成功色阶（Success-1～Success-10）用于完成、通过、正向反馈等场景，请按场景选用 Success token，避免硬编码色值。';
+  }
+  if (tab === '警示色') {
+    return '警示色阶（Warning-1～Warning-10）用于提醒、注意与非阻断风险提示，请按场景选用 Warning token，避免硬编码色值。';
   }
   return '有言的品牌主色，用于视觉重的强引导，根据具体场景抓请使用';
 });
@@ -450,50 +480,7 @@ $back-4: #e8eaee;
   transform: rotate(180deg);
 }
 
-/* 二级导航：Figma Design-system-test 组件 node 39:86（未选中 / hover / 选中） */
-.ds-nav-l2 {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  min-height: 44px;
-  padding: 10px 32px;
-  box-sizing: border-box;
-  border: none;
-  border-left: 3px solid transparent;
-  background: transparent;
-  text-align: left;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: normal;
-  color: $text-5;
-  font-family: inherit;
-  cursor: pointer;
-  white-space: nowrap;
-  overflow: hidden;
-  transition:
-    color 0.12s ease,
-    background 0.12s ease,
-    border-color 0.12s ease;
-
-  /* hover：Back-4 底 + Text-1 字色，无左边线 */
-  &:hover:not(.ds-nav-l2--active) {
-    background: $back-4;
-    color: $text-1;
-  }
-}
-
-.ds-nav-l2--active {
-  background: $back-4;
-  color: $text-1;
-  font-weight: 400;
-  border-left-color: $text-1;
-}
-
-.ds-nav-l2--active:hover {
-  background: $back-4;
-  color: $text-1;
-  border-left-color: $text-1;
-}
+/* 二级导航：见组件 DsNavL2.vue（Figma frame 39:86） */
 
 /* main-content 横向滚动；<1440 固定 1000+120 边距；≥1440 内容宽 1000→1200 线性（至 1920 封顶） */
 $layout-breakpoint: 1440px;
