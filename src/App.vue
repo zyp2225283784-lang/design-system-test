@@ -6,7 +6,7 @@
         <span class="ds-brand-title">Desgn system</span>
       </div>
       <nav class="ds-sidebar-nav">
-        <div v-for="group in navGroups" :key="group.key" class="ds-nav-group">
+        <div v-for="group in navGroupsWithActive" :key="group.key" class="ds-nav-group">
           <button
             type="button"
             class="ds-nav-l1"
@@ -33,7 +33,12 @@
             </span>
           </button>
           <div v-show="isExpanded(group.key)" class="ds-nav-children">
-            <DsNavL2 v-for="item in group.items" :key="item.label" :active="item.active">
+            <DsNavL2
+              v-for="item in group.items"
+              :key="item.label"
+              :active="item.active"
+              @click="selectNav(item.label)"
+            >
               {{ item.label }}
             </DsNavL2>
           </div>
@@ -43,100 +48,251 @@
 
     <main class="ds-main">
       <div class="ds-main-content">
-        <header class="ds-main-header">
-          <div class="ds-content">
-            <h1 class="ds-page-title">颜色</h1>
-          </div>
-        </header>
+        <!-- 颜色：Figma 颜色规范页 -->
+        <template v-if="activeNavLabel === '颜色'">
+          <header class="ds-main-header">
+            <div class="ds-content">
+              <h1 class="ds-page-title">颜色</h1>
+            </div>
+          </header>
 
-        <div class="ds-tabs-bar">
-          <div class="ds-content">
-            <div class="ds-tabs" role="tablist" aria-label="颜色分类">
-              <button
-                v-for="tab in colorTabs"
-                :key="tab"
-                type="button"
-                role="tab"
-                class="ds-tab"
-                :class="{ 'ds-tab--active': tab === activeColorTab }"
-                :aria-selected="tab === activeColorTab"
-                @click="activeColorTab = tab"
-              >
-                <span class="ds-tab__label">{{ tab }}</span>
-              </button>
+          <div class="ds-tabs-bar">
+            <div class="ds-content">
+              <div class="ds-tabs" role="tablist" aria-label="颜色分类">
+                <button
+                  v-for="tab in colorTabs"
+                  :key="tab"
+                  type="button"
+                  role="tab"
+                  class="ds-tab"
+                  :class="{ 'ds-tab--active': tab === activeColorTab }"
+                  :aria-selected="tab === activeColorTab"
+                  @click="activeColorTab = tab"
+                >
+                  <span class="ds-tab__label">{{ tab }}</span>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="ds-content">
-          <p class="ds-desc">
-            {{ colorTabDesc }}
-          </p>
+          <div class="ds-content">
+            <p class="ds-desc">
+              {{ colorTabDesc }}
+            </p>
 
-          <div class="ds-table-wrap">
-            <div class="ds-table">
-              <div class="ds-tr ds-tr--head">
-                <div class="ds-th">Token</div>
-                <div class="ds-th">Value</div>
-                <div class="ds-th">示例</div>
-              </div>
-              <div v-for="row in colorTableRows" :key="`${activeColorTab}-${row.tokenKey}`" class="ds-tr">
-                <div class="ds-td ds-td--token">{{ row.tokenLabel }}</div>
-                <div class="ds-td ds-td--value">
-                  <div class="ds-td-value-copy-wrap">
-                    <span class="ds-td-token-text">{{ row.value }}</span>
-                    <button
-                      type="button"
-                      class="ds-token-copy"
-                      :class="{ 'ds-token-copy--copied': lastCopiedToken === row.value }"
-                      :aria-label="`复制色值 ${row.value}`"
-                      @click.stop="copyToken(row.value)"
-                    >
-                      <svg
-                        v-if="lastCopiedToken !== row.value"
-                        class="ds-token-copy__icon"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                        aria-hidden="true"
+            <div class="ds-table-wrap">
+              <div class="ds-table">
+                <div class="ds-tr ds-tr--head">
+                  <div class="ds-th">Token</div>
+                  <div class="ds-th">Value</div>
+                  <div class="ds-th">示例</div>
+                </div>
+                <div v-for="row in colorTableRows" :key="`${activeColorTab}-${row.tokenKey}`" class="ds-tr">
+                  <div class="ds-td ds-td--token">{{ row.tokenLabel }}</div>
+                  <div class="ds-td ds-td--value">
+                    <div class="ds-td-value-copy-wrap">
+                      <span class="ds-td-token-text">{{ row.value }}</span>
+                      <button
+                        type="button"
+                        class="ds-token-copy"
+                        :class="{ 'ds-token-copy--copied': lastCopiedToken === row.value }"
+                        :aria-label="`复制色值 ${row.value}`"
+                        @click.stop="copyToken(row.value)"
                       >
-                        <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2" />
-                        <path
-                          d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
-                          stroke="currentColor"
-                          stroke-width="2"
-                        />
-                      </svg>
-                      <svg
-                        v-else
-                        class="ds-token-copy__icon ds-token-copy__icon--ok"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                        aria-hidden="true"
-                      >
-                        <path
-                          d="M20 6L9 17l-5-5"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        />
-                      </svg>
-                    </button>
+                        <svg
+                          v-if="lastCopiedToken !== row.value"
+                          class="ds-token-copy__icon"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          aria-hidden="true"
+                        >
+                          <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2" />
+                          <path
+                            d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                            stroke="currentColor"
+                            stroke-width="2"
+                          />
+                        </svg>
+                        <svg
+                          v-else
+                          class="ds-token-copy__icon ds-token-copy__icon--ok"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          aria-hidden="true"
+                        >
+                          <path
+                            d="M20 6L9 17l-5-5"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="ds-td ds-td--sample">
+                    <span class="ds-swatch" :style="{ background: row.value }" />
                   </div>
                 </div>
-                <div class="ds-td ds-td--sample">
-                  <span class="ds-swatch" :style="{ background: row.value }" />
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- 间距：Figma 70:1405 -->
+        <template v-else-if="activeNavLabel === '间距'">
+          <header class="ds-main-header ds-main-header--spacing">
+            <div class="ds-content">
+              <h1 class="ds-page-title">间距</h1>
+            </div>
+          </header>
+
+          <div class="ds-content">
+            <p class="ds-desc">
+              {{ spacingPageDesc }}
+            </p>
+
+            <div class="ds-table-wrap">
+              <div class="ds-table ds-table--spacing">
+                <div class="ds-tr ds-tr--head">
+                  <div class="ds-th">Token</div>
+                  <div class="ds-th">rem</div>
+                  <div class="ds-th">px</div>
+                  <div class="ds-th">示例</div>
+                </div>
+                <div
+                  v-for="row in spacingTableRows"
+                  :key="row.tokenKey"
+                  class="ds-tr ds-tr--spacing"
+                  :style="{ minHeight: `${row.rowHeight}px` }"
+                >
+                  <div class="ds-td ds-td--token">{{ row.tokenLabel }}</div>
+                  <div class="ds-td ds-td--value">
+                    <div class="ds-td-value-copy-wrap">
+                      <span class="ds-td-token-text">{{ row.rem }}</span>
+                      <button
+                        type="button"
+                        class="ds-token-copy"
+                        :class="{ 'ds-token-copy--copied': lastCopiedToken === row.rem }"
+                        :aria-label="`复制 rem ${row.rem}`"
+                        @click.stop="copyToken(row.rem)"
+                      >
+                        <svg
+                          v-if="lastCopiedToken !== row.rem"
+                          class="ds-token-copy__icon"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          aria-hidden="true"
+                        >
+                          <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2" />
+                          <path
+                            d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                            stroke="currentColor"
+                            stroke-width="2"
+                          />
+                        </svg>
+                        <svg
+                          v-else
+                          class="ds-token-copy__icon ds-token-copy__icon--ok"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          aria-hidden="true"
+                        >
+                          <path
+                            d="M20 6L9 17l-5-5"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="ds-td ds-td--value">
+                    <div class="ds-td-value-copy-wrap">
+                      <span class="ds-td-token-text">{{ row.px }}</span>
+                      <button
+                        type="button"
+                        class="ds-token-copy"
+                        :class="{ 'ds-token-copy--copied': lastCopiedToken === String(row.px) }"
+                        :aria-label="`复制 px ${row.px}`"
+                        @click.stop="copyToken(String(row.px))"
+                      >
+                        <svg
+                          v-if="lastCopiedToken !== String(row.px)"
+                          class="ds-token-copy__icon"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          aria-hidden="true"
+                        >
+                          <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2" />
+                          <path
+                            d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                            stroke="currentColor"
+                            stroke-width="2"
+                          />
+                        </svg>
+                        <svg
+                          v-else
+                          class="ds-token-copy__icon ds-token-copy__icon--ok"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          aria-hidden="true"
+                        >
+                          <path
+                            d="M20 6L9 17l-5-5"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="ds-td ds-td--spacing-sample">
+                    <span
+                      class="ds-spacing-swatch"
+                      :style="{ width: `${row.px}px`, height: `${row.px}px`, minWidth: `${row.px}px`, minHeight: `${row.px}px` }"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </template>
+
+        <!-- 其他导航项占位 -->
+        <template v-else>
+          <header class="ds-main-header">
+            <div class="ds-content">
+              <h1 class="ds-page-title">{{ activeNavLabel }}</h1>
+            </div>
+          </header>
+          <div class="ds-content">
+            <p class="ds-desc">该章节内容建设中。</p>
+          </div>
+        </template>
       </div>
     </main>
   </div>
@@ -151,8 +307,20 @@ import { getNeutralBackValue, neutralBackTableOrder } from './tokens/neutralBack
 import { dangerErrorTableOrder, getDangerErrorValue } from './tokens/dangerError';
 import { getSuccessColorValue, successColorTableOrder } from './tokens/successColor';
 import { getWarningColorValue, warningColorTableOrder } from './tokens/warningColor';
+import { spacingTableRows } from './tokens/spacing';
 
 const logoUrl = `${import.meta.env.BASE_URL}assets/a30a4efc4bf8ca5a2e3f13072b9e5e86d7f24a96.svg`;
+
+/** 侧栏当前选中的二级项（与 DsNavL2 高亮一致） */
+const activeNavLabel = ref('颜色');
+
+function selectNav(label: string): void {
+  activeNavLabel.value = label;
+}
+
+/** Figma 70:1405 描述区占位文案已替换为间距语义说明 */
+const spacingPageDesc =
+  '间距 token 以 rem 为基准并换算为 px，用于布局与组件内外边距，请按场景选用 spacing token，避免硬编码数值。';
 
 const lastCopiedToken = ref<string | null>(null);
 let copyFeedbackTimer: ReturnType<typeof setTimeout> | null = null;
@@ -176,43 +344,50 @@ type NavGroupKey = 'foundation' | 'prompt' | 'components';
 const navGroups: {
   key: NavGroupKey;
   title: string;
-  items: { label: string; active: boolean }[];
+  items: { label: string }[];
 }[] = [
   {
     key: 'foundation',
     title: '基础规范',
     items: [
-      { label: '颜色', active: true },
-      { label: '字体', active: false },
-      { label: '按钮', active: false },
-      { label: '圆角', active: false },
-      { label: '阴影', active: false },
-      { label: '间距', active: false },
-      { label: '分割线', active: false },
+      { label: '颜色' },
+      { label: '字体' },
+      { label: '按钮' },
+      { label: '圆角' },
+      { label: '阴影' },
+      { label: '间距' },
+      { label: '分割线' },
     ],
   },
   {
     key: 'prompt',
     title: '提示样式',
-    items: [
-      { label: '全局提示', active: false },
-      { label: '气泡提示', active: false },
-    ],
+    items: [{ label: '全局提示' }, { label: '气泡提示' }],
   },
   {
     key: 'components',
     title: '通用组件',
     items: [
-      { label: '搜索', active: false },
-      { label: '下拉', active: false },
-      { label: '导航', active: false },
-      { label: '勾选', active: false },
-      { label: '加载', active: false },
-      { label: '滑条', active: false },
-      { label: '表单输入', active: false },
+      { label: '搜索' },
+      { label: '下拉' },
+      { label: '导航' },
+      { label: '勾选' },
+      { label: '加载' },
+      { label: '滑条' },
+      { label: '表单输入' },
     ],
   },
 ];
+
+const navGroupsWithActive = computed(() =>
+  navGroups.map((g) => ({
+    ...g,
+    items: g.items.map((item) => ({
+      ...item,
+      active: item.label === activeNavLabel.value,
+    })),
+  })),
+);
 
 /** 分组展开状态，默认与原先设计稿一致：三组均展开 */
 const expandedByGroup = reactive<Record<NavGroupKey, boolean>>({
@@ -545,9 +720,15 @@ $content-width-fluid: clamp(
 }
 
 .ds-main-header {
-  padding: 48px 0 24px;
+  padding: 80px 0 24px;
   border-bottom: 1px solid $back-4;
   box-sizing: border-box;
+}
+
+/* Figma 70:1405 画板头部：pt 80 / pb 24 */
+.ds-main-header--spacing {
+  padding-top: 80px;
+  padding-bottom: 24px;
 }
 
 .ds-page-title {
@@ -802,5 +983,23 @@ $content-width-fluid: clamp(
   flex-shrink: 0;
   /* 内描边：Back-4，各 Tab 示例列统一 */
   box-shadow: inset 0 0 0 1px $back-4;
+}
+
+/* 间距表：四列；示例列为白底 + Text-7 描边方块（Figma 70:1771） */
+.ds-table--spacing .ds-tr--spacing {
+  min-height: 0;
+}
+
+.ds-td--spacing-sample {
+  padding: 20px 16px;
+  align-items: center;
+}
+
+.ds-spacing-swatch {
+  display: block;
+  flex-shrink: 0;
+  background: $back-1;
+  border: 1px solid $text-7;
+  box-sizing: border-box;
 }
 </style>
